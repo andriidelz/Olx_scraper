@@ -1,0 +1,22 @@
+version: '3.9'
+services:
+  olx_scraper:
+    build: .
+    volumes:
+      - ./olx_scraper:/olx_scraper
+    environment:
+      - DATABASE_URL=postgresql://user:password@db/olx_db
+    depends_on:
+      - db
+    entrypoint: ["/olx_scraper/wait-for-it.sh", "db:5432", "--", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    restart: always
+  db:
+    image: postgres:14.15-alpine3.21
+    environment:
+      POSTGRES_DB: olx_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - olx_data:/var/lib/postgresql/data
+volumes:
+  olx_data:
